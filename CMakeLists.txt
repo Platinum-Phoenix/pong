@@ -4,15 +4,21 @@ project(pong C)
 
 set(SOURCES
 	src/main.c
-  src/window.c
+  src/gfx/window.c
+  src/gfx/gfx.c
+  src/gfx/shader.c
+  src/util/util.c
+  src/game.c
 )
 
+file(COPY res DESTINATION ${CMAKE_BINARY_DIR})
 add_executable(pong ${SOURCES})
 target_link_libraries(pong PRIVATE cglm glfw glad)
 
 set_property(TARGET pong PROPERTY C_STANDARD 11)
 set_property(TARGET pong PROPERTY C_STANDARD_REQUIRED on)
 
+include_directories(src)
 add_subdirectory(lib/glfw)
 add_subdirectory(lib/glad)
 add_subdirectory(lib/cglm)

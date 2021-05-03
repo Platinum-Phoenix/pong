@@ -2,7 +2,7 @@
 #define WINDOW_H
 
 #include "gfx.h"
-#include "util.h"
+#include "../util/util.h"
 
 struct Key {
     // Whether the key is held down
@@ -17,12 +17,12 @@ typedef void (*WinFn)(void);
 
 struct Window {
     GLFWwindow* handle;
+    // Keyboard
     struct Key kbd[GLFW_KEY_LAST];
     ivec2s size; 
     WinFn init, destroy, update, render;
 };
 
-void window_create(WinFn init, WinFn destroy, WinFn update, WinFn render);
-void window_loop(void);
+void window_create(void);
 
 #endif

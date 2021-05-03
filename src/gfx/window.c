@@ -1,8 +1,9 @@
 #include "window.h"
-#include "GLFW/glfw3.h"
-#include "ivec2s.h"
+#include "game.h"
+#include "gfx.h"
 #include "state.h"
 #include "util.h"
+#include "util/ivec2s.h"
 
 static void err_fn(int code, const char *desc) {
     panic("[GLFW] error#%d: %s", code, desc);
@@ -34,7 +35,15 @@ static void kbd_fn(GLFWwindow *handle, int key, int scancode, int action,
     }
 }
 
-void window_create(WinFn init, WinFn destroy, WinFn update, WinFn render) {
+void update_kbd(void) {
+    for (size_t key = 0; key < GLFW_KEY_LAST; key++) {
+        struct Key *k = &state.window.kbd[key];
+        k->tapped = k->down && !k->last;
+        k->last = k->down;
+    }
+}
+
+void window_create(void) {
     state.window.init = init;
     state.window.destroy = destroy;
     state.window.update = update;
