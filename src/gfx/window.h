@@ -4,6 +4,8 @@
 #include "gfx.h"
 #include "../util/util.h"
 
+#define key(k) (state.window.kbd[k])
+
 struct Key {
     // Whether the key is held down
     bool down; 
@@ -21,8 +23,10 @@ struct Window {
     struct Key kbd[GLFW_KEY_LAST];
     ivec2s size; 
     WinFn init, destroy, update, render;
+    bool wireframe;
 };
 
 void window_create(void);
+void update_kbd(void);
 
 #endif

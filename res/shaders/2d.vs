@@ -1,8 +1,13 @@
 #version 330 core
-layout (location = 0) in vec3 posistion;
+layout (location = 0) in vec2 position;
+
+uniform mat3 model;
+uniform mat4 view; 
+uniform mat4 projection; 
 
 void main() {
-    gl_Position = vec4(posistion, 1.0);
+    vec3 world = model * vec3(position, 1.0);
+    gl_Position = projection * view * vec4(world, 1.0);
 }
 
 // vim:ft=glsl

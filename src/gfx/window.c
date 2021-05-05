@@ -52,12 +52,13 @@ void window_create(void) {
     glfwSetErrorCallback(err_fn);
 
     if (!glfwInit()) {
-        panic("error initializing GLFW");
+        panic("[GLFW] error: failed to initialize");
     }
 
     state.window.size = (ivec2s){{640, 480}};
+    state.window.wireframe = false;
 
-    // glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -66,15 +67,15 @@ void window_create(void) {
 #endif
 
     state.window.handle = glfwCreateWindow(
-        state.window.size.x, state.window.size.y, "Pong", NULL, NULL);
+        state.window.size.x, state.window.size.y, "pong", NULL, NULL);
 
     if (!state.window.handle) {
         glfwTerminate();
-        panic("error creating window");
+        panic("[GLFW] error: failed to create window");
     }
 
     glfwMakeContextCurrent(state.window.handle);
-    // Load OpenGL extensions and stuff
+    // Load OpenGL extensions and functions
     gladLoadGL(glfwGetProcAddress);
 
     // configure GLFW's callbacks

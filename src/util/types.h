@@ -1,7 +1,13 @@
 #ifndef TYPES_H
 #define TYPES_H
 
+#include "ivec2.h"
+#include "ivec2s.h"
 #include <stdint.h>
+#define CGLM_DEFINE_PRINTS
+#include <cglm/cglm.h>
+#include <cglm/struct.h>
+#include <cglm/types.h>
 
 typedef uint8_t u8;
 typedef uint16_t u16;

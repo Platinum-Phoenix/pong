@@ -11,7 +11,9 @@ int main(void) {
     state.window.init();
 
     while (!glfwWindowShouldClose(state.window.handle)) {
+        // Process input and update posistions
         state.window.update();
+
         state.window.render();
 
         // Move the rendered buffer onto the screen buffer

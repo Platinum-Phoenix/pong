@@ -3,7 +3,7 @@
 #include <stddef.h>
 #include <stdio.h>
 
-static unsigned int compile_shader(const char *path, enum ShaderType type) {
+static unsigned int compile_shader(const char *path, GLenum type) {
     FILE *fp;
     char *txt;
     size_t sz;
@@ -37,7 +37,7 @@ static unsigned int compile_shader(const char *path, enum ShaderType type) {
         log = alloc(len);
         glGetShaderInfoLog(handle, len, NULL, log);
         fprintf(stderr, "[%s shader] compliation error:\n%s",
-                type == VertexShader ? "vertex" : "fragment", log);
+                type == GL_VERTEX_SHADER ? "vertex" : "fragment", log);
         free(log);
         exit(1);
     }
@@ -48,8 +48,8 @@ static unsigned int compile_shader(const char *path, enum ShaderType type) {
 struct Shader shader_create(const char *vs_path, const char *fs_path) {
     struct Shader self;
     int sucessful;
-    unsigned int vs_handle = compile_shader(vs_path, VertexShader);
-    unsigned int fs_handle = compile_shader(fs_path, FragmentShader);
+    unsigned int vs_handle = compile_shader(vs_path, GL_VERTEX_SHADER);
+    unsigned int fs_handle = compile_shader(fs_path, GL_FRAGMENT_SHADER);
     self.handle = glCreateProgram();
     glAttachShader(self.handle, vs_handle);
     glAttachShader(self.handle, fs_handle);
@@ -71,8 +71,29 @@ struct Shader shader_create(const char *vs_path, const char *fs_path) {
     return self;
 }
 
-void shader_use(struct Shader self) {
-    glUseProgram(self.handle);
+GLint get_uniform_location(struct Shader self, const char *name) {
+    int loc = glGetUniformLocation(self.handle, name);
+    if (loc < 0) {
+        fprintf(stderr, "[shader] warning: %s is not a uniform in shader#%d",
+                name, self.handle);
+    }
+    return loc;
+}
+
+void shader_use(struct Shader self) { glUseProgram(self.handle); }
+
+void shader_uniform_mat3(struct Shader self, const char *name, mat3s m) {
+    glUniformMatrix3fv(glGetUniformLocation(self.handle, name), 1, GL_FALSE,
+                       (const GLfloat *)&m.raw);
+}
+
+void shader_uniform_mat4(struct Shader self, const char *name, mat4s m) {
+    glUniformMatrix4fv(glGetUniformLocation(self.handle, name), 1, GL_FALSE,
+                       (const GLfloat *)&m.raw);
+}
+
+void shader_uniform_vec3(struct Shader self, const char *name, vec3s v) {
+    glUniform3f(glGetUniformLocation(self.handle, name), v.x, v.y, v.z);
 }
 
 void shader_destroy(struct Shader self) { glDeleteProgram(self.handle); }
