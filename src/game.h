@@ -10,12 +10,9 @@ struct Paddle {
 
 struct Ball {
     vec2s pos;
+    // direction in radians
+    f32 dir;
     struct Mesh mesh;
-};
-
-struct Arena {
-    struct Paddle player;
-    struct Ball ball;
 };
 
 void init(void);

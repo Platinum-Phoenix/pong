@@ -1,6 +1,5 @@
 #include "gfx.h"
 #include "state.h"
-#include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -28,7 +27,7 @@ struct Vao vao_create(void) {
 
 void vao_bind(struct Vao self) { glBindVertexArray(self.handle); }
 
-void vao_destroy(struct Vao self) { glDeleteVertexArrays(1, &self.handle); }
+void vao_destroy(const struct Vao self) { glDeleteVertexArrays(1, &self.handle); }
 
 void vao_attr(u32 idx, int size, GLenum type, GLsizei stride, size_t offset) {
     glVertexAttribPointer(idx, size, type, GL_FALSE, stride, (void *)offset);
@@ -38,10 +37,10 @@ void vao_attr(u32 idx, int size, GLenum type, GLsizei stride, size_t offset) {
 void camera_init(struct Camera *self) {
     self->view = glms_mat4_identity();
     self->proj = glms_ortho(0.0f, (f32)state.window.size.x, 0.0f,
-                            (f32)state.window.size.y, -100.0f, 100.0f);
+                            (f32)state.window.size.y, -1000.0f, 1000.0f);
 }
 
-// clang-format off
+/* clang-format off */
 const f32 SQUARE_VERTICES[] = {
     0.0f, 1.0f, 
     1.0f, 1.0f, 
@@ -51,9 +50,10 @@ const f32 SQUARE_VERTICES[] = {
 
 const u32 SQUARE_INDICES[] = {
     0, 1, 2, 
-    2, 3, 0
+    2, 3, 0 
 };
-// clang-format on
+/* clang-format on */
+
 
 void mesh_init(struct Mesh *self, const f32 *vertices, size_t vertices_len,
                const u32 *indices, size_t indices_len) {
@@ -85,7 +85,7 @@ void mesh_render(const struct Mesh *self, mat3s model) {
     glDrawElements(GL_TRIANGLES, self->indices_len, GL_UNSIGNED_INT, 0);
 }
 
-void mesh_destroy(const struct Mesh* self) {
+void mesh_destroy(const struct Mesh *self) {
     vao_destroy(self->vao);
     bo_destroy(self->vbo);
     bo_destroy(self->ebo);

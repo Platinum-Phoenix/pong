@@ -1,0 +1,15 @@
+#!/bin/sh
+
+mkdir -p build
+
+CMAKE_FLAGS=-DCMAKE_EXPORT_COMPILE_COMMANDS=1
+
+if [ "$1" = "debug" ]; then
+	mkdir -p build/debug
+	cmake -S . -B build/debug -DCMAKE_BUILD_TYPE=Debug ${CMAKE_FLAGS}	
+	cmake --build build/debug
+elif [ "$1" = "release" ]; then
+	mkdir -p build/release
+	cmake -S . -B build/release -DCMAKE_BUILD_TYPE=Release ${CMAKE_FLAGS}
+	cmake --build build/release
+fi

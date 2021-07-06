@@ -1,12 +1,12 @@
 #include "window.h"
 #include "game.h"
-#include "gfx.h"
 #include "state.h"
-#include "util.h"
-#include "util/ivec2s.h"
+
+#define WINDOW_WIDTH 640
+#define WINDOW_HEIGHT 480
 
 static void err_fn(int code, const char *desc) {
-    panic("[GLFW] error#%d: %s", code, desc);
+    panic("[GLFW] error(code:%d): %s", code, desc);
 }
 
 // updates the window size
@@ -55,7 +55,7 @@ void window_create(void) {
         panic("[GLFW] error: failed to initialize");
     }
 
-    state.window.size = (ivec2s){{640, 480}};
+    state.window.size = (ivec2s){{WINDOW_WIDTH, WINDOW_HEIGHT}};
     state.window.wireframe = false;
 
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);

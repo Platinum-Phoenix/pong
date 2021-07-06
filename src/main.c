@@ -1,6 +1,5 @@
 #include "gfx/gfx.h"
 #include "state.h"
-#include <stdio.h>
 
 // global state
 struct State state;
@@ -10,9 +9,12 @@ int main(void) {
 
     state.window.init();
 
-    while (!glfwWindowShouldClose(state.window.handle)) {
-        // Process input and update posistions
-        state.window.update();
+    loop {
+        // the game starts a bit too quick
+        if (glfwGetTime() >= 0.6f) {
+            // Process input and update posistions
+            state.window.update();
+        }
 
         state.window.render();
 
@@ -26,5 +28,6 @@ int main(void) {
     }
 
     state.window.destroy();
+
     return 0;
 }

@@ -1,7 +1,7 @@
-#include "util.h"
+#include "util/util.h" 
+#include <errno.h>
 #include <stddef.h>
 #include <stdlib.h>
-#include <errno.h>
 #include <string.h>
 
 noreturn void panic(const char *fmt, ...) {
@@ -11,15 +11,42 @@ noreturn void panic(const char *fmt, ...) {
     va_end(args);
     fputs("\n", stderr);
     if (errno != 0) {
-        fprintf(stderr, "os error#%d: %s", errno, strerror(errno));
+        fprintf(stderr, "[os] error(code:%d): %s\n", errno, strerror(errno));
     }
     exit(EXIT_FAILURE);
 }
 
-void* alloc(size_t sz) {
-   void* tmp = malloc(sz);
-   if (!tmp) {
-       panic("[misc]: memory allocation error");
-   }
-   return tmp;
+void *alloc(size_t sz) {
+    void *tmp = malloc(sz);
+    if (!tmp) {
+        panic("[misc] error: failed to allocate %d bytes of memory", sz);
+    }
+    return tmp;
+}
+
+bool rects_collide(vec2s r1p, vec2s r1s, vec2s r2p, vec2s r2s) {
+    // some beefy code :|
+    f32 r1_right_edge = r1p.x + r1s.x;
+    f32 r1_left_edge = r1p.x;
+    f32 r1_top_edge = r1p.y + r1s.y;
+    f32 r1_bottom_edge = r1p.y;
+
+    f32 r2_right_edge = r2p.x + r2s.x;
+    f32 r2_left_edge = r2p.x;
+    f32 r2_top_edge = r2p.y + r2s.y;
+    f32 r2_bottom_edge = r2p.y;
+
+    if (r1_right_edge >= r2_left_edge && // r1 right edge past r2 left
+        r1_left_edge <= r2_right_edge && // r1 left edge past r2 right
+        r1_top_edge >= r2_bottom_edge && // r1 top edge past r2 bottom
+        r1_bottom_edge <= r2_top_edge) { // r1 bottom edge past r2 top
+        return true;
+    }
+
+    return false;
+}
+
+float rand_float(float min, float max) {
+    float scale = rand() / (float)RAND_MAX;
+    return min + scale * (max - min);
 }

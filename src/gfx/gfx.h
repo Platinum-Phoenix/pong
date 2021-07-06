@@ -1,7 +1,7 @@
 #ifndef GFX_H
 #define GFX_H
 
-#include "util/types.h"
+#include "util/util.h"
 #include <glad/gl.h>
 #include <stddef.h>
 #define GLFW_INCLUDE_NONE
@@ -53,12 +53,12 @@ struct Mesh {
 #define SQUARE_VERTICES_LEN 8
 #define SQUARE_INDICES_LEN 6
 extern const f32 SQUARE_VERTICES[];
-extern const u32 SQUARE_INDICES[]; 
+extern const u32 SQUARE_INDICES[];
 
 void mesh_init(struct Mesh *self, const f32 *vertices, size_t vertex_count,
                const u32 *indices, size_t index_count);
 /// model: transformation matrix
 void mesh_render(const struct Mesh *self, mat3s model);
-void mesh_destroy(const struct Mesh* self);
+void mesh_destroy(const struct Mesh *self);
 
 #endif

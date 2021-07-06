@@ -2,9 +2,10 @@
 #define WINDOW_H
 
 #include "gfx.h"
-#include "../util/util.h"
+#include "util/util.h"
 
 #define key(k) (state.window.kbd[k])
+#define loop while (!glfwWindowShouldClose(state.window.handle) && state.running) 
 
 struct Key {
     // Whether the key is held down
