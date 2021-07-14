@@ -4,7 +4,6 @@
 #include "ivec2.h"
 #include "ivec2s.h"
 #include <stdint.h>
-#define CGLM_DEFINE_PRINTS
 #include <cglm/cglm.h>
 #include <cglm/struct.h>
 #include <cglm/types.h>

@@ -1,12 +1,11 @@
 #include "window.h"
 #include "game.h"
 #include "state.h"
-
-#define WINDOW_WIDTH 640
-#define WINDOW_HEIGHT 480
+#define WINDOW_WIDTH 800
+#define WINDOW_HEIGHT 600
 
 static void err_fn(int code, const char *desc) {
-    panic("[GLFW] error(code:%d): %s", code, desc);
+    error("[GLFW] error(code:%d): %s", code, desc);
 }
 
 // updates the window size
@@ -43,16 +42,18 @@ void update_kbd(void) {
     }
 }
 
-void window_create(void) {
+int window_create(void) {
     state.window.init = init;
     state.window.destroy = destroy;
     state.window.update = update;
     state.window.render = render;
-
+    state.window.last_second = glfwGetTime();
+    
     glfwSetErrorCallback(err_fn);
 
     if (!glfwInit()) {
-        panic("[GLFW] error: failed to initialize");
+        error("[GLFW] error: failed to initialize");
+        return ERR;
     }
 
     state.window.size = (ivec2s){{WINDOW_WIDTH, WINDOW_HEIGHT}};
@@ -71,7 +72,8 @@ void window_create(void) {
 
     if (!state.window.handle) {
         glfwTerminate();
-        panic("[GLFW] error: failed to create window");
+        error("[GLFW] error: failed to create window");
+        return ERR;
     }
 
     glfwMakeContextCurrent(state.window.handle);
@@ -81,4 +83,6 @@ void window_create(void) {
     // configure GLFW's callbacks
     glfwSetFramebufferSizeCallback(state.window.handle, size_fn);
     glfwSetKeyCallback(state.window.handle, kbd_fn);
+
+    return OK;
 }

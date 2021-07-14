@@ -1,51 +1,70 @@
 #include "game.h"
-#include "cglm/struct/io.h"
-#include "cglm/struct/vec2.h"
-#include "cglm/types.h"
 #include "cglm/util.h"
 #include "gfx/shader.h"
+#include "gfx/text.h"
 #include "gfx/window.h"
 #include "state.h"
 #include "util/util.h"
+#include <assert.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 #define PADDLE_SPEED 8.0f
 #define PADDLE_WIDTH 16.0f
-#define PADDLE_HEIGHT 100.0f
-#define BALL_SIZE 12.0f
-#define BALL_SPEED 8.0f
+#define PADDLE_HEIGHT 128.0f
+#define BALL_WIDTH 16.0f
+#define BALL_HEIGHT 16.0f
+#define BALL_SIZE                                                              \
+    (vec2s) {                                                                  \
+        { BALL_WIDTH, BALL_HEIGHT }                                            \
+    }
+#define PADDLE_SIZE                                                            \
+    (vec2s) {                                                                  \
+        { PADDLE_WIDTH, PADDLE_HEIGHT }                                        \
+    }
+#define BALL_SPEED_INIT 8.0f
+enum Side { SIDE_LEFT, SIDE_RIGHT };
 
 static void ball_init(struct Ball *self) {
     mesh_init(&self->mesh, SQUARE_VERTICES, SQUARE_VERTICES_LEN, SQUARE_INDICES,
               SQUARE_INDICES_LEN);
 
-    self->pos = (vec2s){{(state.window.size.x / 2.0f) - BALL_SIZE / 2,
-                         (state.window.size.y / 2.0f) - BALL_SIZE / 2}};
-    self->dir = rand_float(0.0f, GLM_PI * 2);
+    self->pos = (vec2s){{(state.window.size.x / 2.0f) - BALL_WIDTH / 2,
+                         (state.window.size.y / 2.0f) - BALL_HEIGHT / 2}};
+    self->speed = BALL_SPEED_INIT;
+    self->dir = 0.0f;
 }
 
 static void ball_render(const struct Ball *self) {
     mat3s model = glms_translate2d_make(self->pos);
-    model = glms_scale2d(model, (vec2s){{BALL_SIZE, BALL_SIZE}});
+    model = glms_scale2d(model, BALL_SIZE);
     mesh_render(&self->mesh, model);
 }
 
 static void ball_destroy(const struct Ball *self) { mesh_destroy(&self->mesh); }
 
-static void paddle_init(struct Paddle *self) {
+static void paddle_init(struct Paddle *self, enum Side side) {
     mesh_init(&self->mesh, SQUARE_VERTICES, SQUARE_VERTICES_LEN, SQUARE_INDICES,
               SQUARE_INDICES_LEN);
 
-    self->pos = (vec2s){
-        {PADDLE_WIDTH, (state.window.size.y / 2.0f) - PADDLE_HEIGHT / 2}};
+    switch (side) {
+    case SIDE_LEFT:
+        self->pos.x = PADDLE_WIDTH;
+        self->pos.y = (state.window.size.y / 2.0f) - (PADDLE_HEIGHT / 2);
+        break;
+    case SIDE_RIGHT:
+        self->pos.x = state.window.size.x - (PADDLE_WIDTH * 2);
+        self->pos.y = (state.window.size.y / 2.0f) - (PADDLE_HEIGHT / 2);
+        break;
+    }
 }
 
 static void paddle_render(const struct Paddle *self) {
     mat3s model = glms_translate2d_make(self->pos);
-    model = glms_scale2d(model, (vec2s){{PADDLE_WIDTH, PADDLE_HEIGHT - 1}});
+    model = glms_scale2d(model, PADDLE_SIZE);
     mesh_render(&self->mesh, model);
 }
 
@@ -53,77 +72,146 @@ static void paddle_destroy(const struct Paddle *self) {
     mesh_destroy(&self->mesh);
 }
 
-void init(void) {
+int init(void) {
+    state.game_state = STATE_MENU;
+    state.running = true;
+    state.winner = PLAYER_NONE;
     // set the random seed
-    srand(time(NULL));
+    srand((unsigned long)time(NULL));
 
     puts("Welcome to Pong!");
-    state.score = 0;
-    state.running = true;
-    state.shader = shader_create("res/shaders/2d.vert", "res/shaders/2d.frag");
+    state.player1.score = 0;
+    state.player2.score = 0;
+    if (shader_init(&state.shaders[SHADER_2D], "res/shaders/2d.vert",
+                    "res/shaders/2d.frag") == ERR) {
+        error("[shader] error: failed to initialize the 2D shader");
+        return ERR;
+    }
+    if (shader_init(&state.shaders[SHADER_TEXT], "res/shaders/text.vert",
+                    "res/shaders/text.frag") == ERR) {
+        error("[shader] error: failed to initialize the text shader");
+        return ERR;
+    }
 
+    // for font rendering
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    if (text_renderer_init(&state.text_renderer) == ERR) {
+        error("[text_renderer] error: failed to initialize");
+        return ERR;
+    }
     // initialize game objects
     camera_init(&state.camera);
     ball_init(&state.ball);
-    paddle_init(&state.player);
+    paddle_init(&state.player1, SIDE_LEFT);
+    paddle_init(&state.player2, SIDE_RIGHT);
+
+    return 0;
 }
 
-void destroy(void) {
-    shader_destroy(state.shader);
-    paddle_destroy(&state.player);
+int destroy(void) {
+    for (size_t i = 0; i < SHADER_LAST; ++i)
+        shader_destroy(state.shaders[i]);
+    paddle_destroy(&state.player1);
+    paddle_destroy(&state.player2);
     ball_destroy(&state.ball);
     glfwDestroyWindow(state.window.handle);
     glfwTerminate();
+
+    return OK;
 }
 
-void update(void) {
+int update(void) {
     update_kbd();
 
-    // update ball position
-    state.ball.pos.x += BALL_SPEED * cosf(state.ball.dir);
-    state.ball.pos.y += BALL_SPEED * sinf(state.ball.dir);
+    if (state.game_state == STATE_MENU) {
+        if (key(GLFW_KEY_ENTER).tapped) {
+            state.game_state = STATE_ACTIVE;
+        }
+        return OK;
+    }
+
+    if (state.game_state == STATE_END) {
+        if (key(GLFW_KEY_ENTER).tapped) {
+            state.game_state = STATE_ACTIVE;
+            state.running = false;
+        }
+        return OK;
+    }
+
+    if (state.player1.score >= 11) {
+        state.game_state = STATE_END;
+        state.winner = PLAYER_1;
+    } else if (state.player2.score >= 11) {
+        state.game_state = STATE_END;
+        state.winner = PLAYER_2;
+    }
 
     // when the ball collides with the paddle, I use where it lands to
     // change where it will bounce.
-    // On the walls, I reflect the angle and add a random float for variation.
-    if (rects_collide(state.player.pos, (vec2s){{PADDLE_WIDTH, PADDLE_HEIGHT}},
-                      state.ball.pos, (vec2s){{BALL_SIZE, BALL_SIZE}})) {
-
-
+    // On the walls, I reflect the angle
+    if (rects_collide(state.player1.pos, PADDLE_SIZE, state.ball.pos,
+                      BALL_SIZE)) {
         f32 land_dist_y =
-            (state.player.pos.y + PADDLE_HEIGHT / 2) - state.ball.pos.y;
+            (state.player1.pos.y + PADDLE_HEIGHT / 2) - state.ball.pos.y;
         f32 norm_land_dist_y = (land_dist_y / (PADDLE_HEIGHT / 2));
         state.ball.dir = norm_land_dist_y * glm_rad(75);
-    } else if (state.ball.pos.x <= 0) {
-        // hit the left; player loses
-        printf("You lost!\n");
-        printf("Score: %d\n", state.score);
-        state.running = false;
-        return;
-    } else if (state.ball.pos.x + BALL_SIZE >= (f32)state.window.size.x) {
-        // right wall
-        state.ball.dir =
-            -GLM_PI - state.ball.dir + glm_rad(rand_float(-15.0f, 15.0f));
+        state.ball.speed *= 1.05f;
+    } else if (rects_collide(state.player2.pos, PADDLE_SIZE, state.ball.pos,
+                             BALL_SIZE)) {
+        f32 land_dist_y =
+            (state.player2.pos.y + PADDLE_HEIGHT / 2) - state.ball.pos.y;
+        f32 norm_land_dist_y = (land_dist_y / (PADDLE_HEIGHT / 2));
 
-        state.score += 100;
-    } else if (state.ball.pos.y + BALL_SIZE >= (f32)state.window.size.y) {
+        state.ball.dir = -GLM_PI - (norm_land_dist_y * glm_rad(75));
+        state.ball.speed *= 1.05f;
+        state.ball.pos.x = state.player2.pos.x - PADDLE_WIDTH * 2;
+    } else if (state.ball.pos.x <= 0) {
+        // hit the left; player2 score increases
+        state.player2.score += 1;
+        // bounce
+        state.ball.dir = -GLM_PI - state.ball.dir;
+        // reset the ball's speed
+        state.ball.speed = BALL_SPEED_INIT;
+        state.ball.pos.x = BALL_WIDTH;
+    } else if (state.ball.pos.x + BALL_WIDTH >= (f32)state.window.size.x) {
+        // hit the right wall; player1 score increases
+        state.player1.score += 1;
+        // bounce
+        state.ball.dir = -GLM_PI - state.ball.dir;
+        // reset the ball's speed
+        state.ball.speed = BALL_SPEED_INIT;
+        state.ball.pos.x = (f32)state.window.size.x - BALL_WIDTH;
+    } else if (state.ball.pos.y + BALL_HEIGHT >= (f32)state.window.size.y) {
         // top wall
-        f32 variation;
-        if (state.ball.dir >= glm_rad(90) && state.ball.dir < glm_rad(180)) {
-            variation = glm_rad(rand_float(0.0f, 15.0f));
-        } else {
-            variation = glm_rad(rand_float(-15.0f, 0.0f));
-        }
-        state.ball.dir = -state.ball.dir + variation;
+        state.ball.dir = -state.ball.dir;
+        state.ball.speed *= 1.05f;
+        state.ball.pos.y = (f32)state.window.size.y - BALL_HEIGHT;
     } else if (state.ball.pos.y <= 0) {
         // bottom wall
-        f32 variation;
-        if (state.ball.dir >= glm_rad(90) && state.ball.dir < glm_rad(180)) {
-            variation = glm_rad(rand_float(-15.0f, 0.0f));
+        state.ball.dir = -state.ball.dir;
+        state.ball.speed *= 1.05f;
+        state.ball.pos.y = 0;
+    }
+
+    state.ball.pos.x += state.ball.speed * cos(state.ball.dir);
+    state.ball.pos.y += state.ball.speed * sin(state.ball.dir);
+
+    f32 pad_cen = state.player2.pos.y + PADDLE_HEIGHT / 2;
+    f32 ball_cen = state.ball.pos.y + BALL_HEIGHT / 2;
+    if (ball_cen - pad_cen > 3.0f) {
+        if (state.player2.pos.y + PADDLE_SPEED + PADDLE_HEIGHT <=
+            (f32)state.window.size.y) {
+            state.player2.pos.y += PADDLE_SPEED;
         } else {
-            variation = glm_rad(rand_float(0.0f, 15.0f));
+            state.player2.pos.y = (f32)state.window.size.y - PADDLE_HEIGHT;
         }
-        state.ball.dir = -state.ball.dir + variation;
+    } else if (ball_cen - pad_cen < -3.0f) {
+        if (state.player2.pos.y - PADDLE_SPEED >= 0) {
+            state.player2.pos.y -= PADDLE_SPEED;
+        } else {
+            state.player2.pos.y = 0;
+        }
     }
 
     if (key(GLFW_KEY_RIGHT_BRACKET).tapped) {
@@ -136,25 +224,70 @@ void update(void) {
         }
 
     } else if (key(GLFW_KEY_J).down || key(GLFW_KEY_DOWN).down) {
-        if (state.player.pos.y - PADDLE_SPEED >= 0) {
-            state.player.pos.y -= PADDLE_SPEED;
+        if (state.player1.pos.y - PADDLE_SPEED >= 0) {
+            state.player1.pos.y -= PADDLE_SPEED;
         } else {
-            state.player.pos.y = 0;
+            state.player1.pos.y = 0;
         }
     } else if (key(GLFW_KEY_K).down || key(GLFW_KEY_UP).down) {
-        if (state.player.pos.y + PADDLE_SPEED + PADDLE_HEIGHT <=
+        if (state.player1.pos.y + PADDLE_SPEED + PADDLE_HEIGHT <=
             (f32)state.window.size.y) {
-            state.player.pos.y += PADDLE_SPEED;
+            state.player1.pos.y += PADDLE_SPEED;
         } else {
-            state.player.pos.y = (f32)state.window.size.y - PADDLE_HEIGHT;
+            state.player1.pos.y = (f32)state.window.size.y - PADDLE_HEIGHT;
         }
+    } else if (key(GLFW_KEY_ESCAPE).down) {
+        state.running = false;
     }
+
+    return OK;
 }
 
-void render(void) {
+static void render_game(void) {
+    char score[8];
+    snprintf(score, sizeof(score), "PTS: %d", state.player1.score);
+    render_text(&state.text_renderer, score, (vec2s){{50.0f, 552.0f}}, 0.7f,
+                (vec3s){{1.0f, 1.0f, 1.0f}});
+    snprintf(score, sizeof(score), "PTS: %d", state.player2.score);
+    render_text(&state.text_renderer, score, (vec2s){{550.0f, 552.0f}}, 0.7f,
+                (vec3s){{1.0f, 1.0f, 1.0f}});
+    ball_render(&state.ball);
+    paddle_render(&state.player1);
+    paddle_render(&state.player2);
+}
+
+static void render_menu(void) {
+    render_text(&state.text_renderer, "PONG", (vec2s){{325.0f, 525.0f}}, 1.0f,
+                (vec3s){{1.0f, 1.0f, 1.0f}});
+
+    render_text(&state.text_renderer, "PRESS <ENTER> TO START",
+                (vec2s){{200.0f, 300.0f}}, 0.5f, (vec3s){{1.0f, 1.0f, 1.0f}});
+}
+
+void render_winner(void) {
+    char text[36];
+    snprintf(text, sizeof(text), "CONGRATULATIONS, PLAYER %d. YOU WIN!",
+             state.winner);
+
+    render_text(&state.text_renderer, text, (vec2s){{60.0f, 300.0f}}, 0.5f,
+                (vec3s){{1.0f, 1.0f, 1.0f}});
+}
+
+int render(void) {
     glClearColor(0.9, 0.4, 0.1, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    ball_render(&state.ball);
-    paddle_render(&state.player);
+    switch (state.game_state) {
+    case STATE_MENU:
+        render_menu();
+        break;
+    case STATE_ACTIVE:
+        render_game();
+        break;
+    case STATE_END:
+        render_winner();
+        break;
+    }
+
+    return OK;
 }

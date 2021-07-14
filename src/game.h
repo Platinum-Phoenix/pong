@@ -5,19 +5,20 @@
 
 struct Paddle {
     vec2s pos;
+    u32 score;
     struct Mesh mesh;
 };
 
 struct Ball {
     vec2s pos;
     // direction in radians
-    f32 dir;
+    f32 dir, speed;
     struct Mesh mesh;
 };
 
-void init(void);
-void update(void);
-void render(void);
-void destroy(void);
+int init(void);
+int update(void);
+int render(void);
+int destroy(void);
 
 #endif

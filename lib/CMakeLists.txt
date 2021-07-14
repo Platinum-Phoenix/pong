@@ -1,0 +1,5 @@
+set(CGLM_STATIC ON)
+add_subdirectory(cglm)
+add_subdirectory(freetype)
+add_subdirectory(glad)
+add_subdirectory(glfw)

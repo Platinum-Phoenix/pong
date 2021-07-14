@@ -7,7 +7,7 @@ struct Shader {
     unsigned int handle;
 };
 
-struct Shader shader_create(const char *vs_path, const char *fs_path);
+int shader_init(struct Shader *self, const char *vs_path, const char *fs_path);
 void shader_destroy(struct Shader self);
 void shader_use(struct Shader self);
 void shader_uniform_vec3(struct Shader self, const char *name, vec3s v);

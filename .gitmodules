@@ -4,3 +4,6 @@
 [submodule "lib/cglm"]
 	path = lib/cglm
 	url = https://github.com/recp/cglm
+[submodule "lib/freetype"]
+	path = lib/freetype
+	url = https://gitlab.freedesktop.org/freetype/freetype.git

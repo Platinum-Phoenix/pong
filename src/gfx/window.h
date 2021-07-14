@@ -16,7 +16,7 @@ struct Key {
     bool tapped;
 };
 
-typedef void (*WinFn)(void);
+typedef int (*WinFn)(void);
 
 struct Window {
     GLFWwindow* handle;
@@ -24,10 +24,13 @@ struct Window {
     struct Key kbd[GLFW_KEY_LAST];
     ivec2s size; 
     WinFn init, destroy, update, render;
+
+    u64 frames, fps;
+    f64 last_second;
     bool wireframe;
 };
 
-void window_create(void);
+int window_create(void);
 void update_kbd(void);
 
 #endif

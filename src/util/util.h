@@ -2,7 +2,6 @@
 #define UTIL_H
 
 #include "types.h"
-#include <cglm/struct/io.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -10,11 +9,13 @@
 #include <stdlib.h>
 #include <stdnoreturn.h>
 
-/// @brief prints formatted output to stderr and then exits with code
-/// EXIT_FAILURE
-noreturn void panic(const char *fmt, ...);
+#define OK 0
+#define ERR -1
+
 /// A version of malloc that never returns null
 void *alloc(size_t sz);
+/// @brief prints formatted output to stderr 
+void error(const char *fmt, ...);
 
 /// @brief Detects if two rectangles collide
 /// @param r1p pos of rectangle 1

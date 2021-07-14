@@ -17,10 +17,10 @@ struct Bo {
     GLenum usage;
 };
 
-struct Bo bo_create(GLenum type, GLenum usage);
-void bo_bind(struct Bo self);
-void bo_data(struct Bo self, const void *data, size_t size);
-void bo_destroy(struct Bo self);
+void bo_init(struct Bo *self, GLenum type, GLenum usage);
+void bo_bind(const struct Bo *self);
+void bo_data(const struct Bo *self, const void *data, size_t size);
+void bo_destroy(const struct Bo *self);
 
 // Vertex Array Object
 // A VAO stores:
@@ -34,6 +34,7 @@ struct Vao {
 
 struct Vao vao_create(void);
 void vao_bind(struct Vao self);
+void vao_unbind(void);
 void vao_destroy(struct Vao self);
 void vao_attr(unsigned int idx, int size, GLenum type, GLsizei stride,
               size_t offset);

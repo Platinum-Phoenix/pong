@@ -4,7 +4,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-noreturn void panic(const char *fmt, ...) {
+void *alloc(size_t sz) {
+    void *tmp = malloc(sz);
+    if (!tmp) {
+        error("[misc] error: failed to allocate %d bytes of memory", sz);
+    }
+    return tmp;
+}
+
+void error(const char *fmt, ...) {
     va_list args;
     va_start(args, fmt);
     vfprintf(stderr, fmt, args);
@@ -13,15 +21,6 @@ noreturn void panic(const char *fmt, ...) {
     if (errno != 0) {
         fprintf(stderr, "[os] error(code:%d): %s\n", errno, strerror(errno));
     }
-    exit(EXIT_FAILURE);
-}
-
-void *alloc(size_t sz) {
-    void *tmp = malloc(sz);
-    if (!tmp) {
-        panic("[misc] error: failed to allocate %d bytes of memory", sz);
-    }
-    return tmp;
 }
 
 bool rects_collide(vec2s r1p, vec2s r1s, vec2s r2p, vec2s r2s) {
