@@ -185,12 +185,12 @@ int update(void) {
     } else if (state.ball.pos.y + BALL_HEIGHT >= (f32)state.window.size.y) {
         // top wall
         state.ball.dir = -state.ball.dir;
-        state.ball.speed *= 1.05f;
+        state.ball.speed += 0.1f;
         state.ball.pos.y = (f32)state.window.size.y - BALL_HEIGHT;
     } else if (state.ball.pos.y <= 0) {
         // bottom wall
         state.ball.dir = -state.ball.dir;
-        state.ball.speed *= 1.05f;
+        state.ball.speed += 0.1f;
         state.ball.pos.y = 0;
     }
 
