@@ -189,7 +189,6 @@ int update(void) {
         f32 land_dist_y =
             (state.player2.pos.y + PADDLE_HEIGHT / 2) - state.ball.pos.y;
         f32 norm_land_dist_y = (land_dist_y / (PADDLE_HEIGHT / 2));
-
         state.ball.dir = -GLM_PI - (norm_land_dist_y * glm_rad(75));
         state.ball.speed *= 1.05f;
         state.ball.pos.x = state.player2.pos.x - PADDLE_WIDTH * 2;
@@ -227,15 +226,16 @@ int update(void) {
     f32 pad_cen = state.player2.pos.y + PADDLE_HEIGHT / 2;
     f32 ball_cen = state.ball.pos.y + BALL_HEIGHT / 2;
 
+    // only move when the ball is past the halfway mark
     if (state.ball.pos.x > (f32)state.window.size.x / 2) {
-        if (ball_cen - pad_cen > PADDLE_HEIGHT / 2.0f) {
+        if (ball_cen - pad_cen > PADDLE_HEIGHT / 3.0f) {
             if (state.player2.pos.y + PADDLE_SPEED + PADDLE_HEIGHT <=
                 (f32)state.window.size.y) {
                 state.player2.pos.y += PADDLE_SPEED;
             } else {
                 state.player2.pos.y = (f32)state.window.size.y - PADDLE_HEIGHT;
             }
-        } else if (ball_cen - pad_cen < -PADDLE_HEIGHT / 2.0f) {
+        } else if (ball_cen - pad_cen < -PADDLE_HEIGHT / 3.0f) {
             if (state.player2.pos.y - PADDLE_SPEED >= 0) {
                 state.player2.pos.y -= PADDLE_SPEED;
             } else {
