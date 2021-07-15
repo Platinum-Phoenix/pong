@@ -79,7 +79,7 @@ int init(void) {
     // set the random seed
     srand((unsigned long)time(NULL));
 
-    puts("Welcome to Pong!");
+    puts("PONG v0 by Phoenix");
     state.player1.score = 0;
     state.player2.score = 0;
     if (shader_init(&state.shaders[SHADER_2D], "res/shaders/2d.vert",
