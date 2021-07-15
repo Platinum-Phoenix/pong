@@ -121,6 +121,33 @@ int destroy(void) {
     return OK;
 }
 
+static void process_input(void) {
+    if (key(GLFW_KEY_RIGHT_BRACKET).tapped) {
+        state.window.wireframe = !state.window.wireframe;
+
+        if (state.window.wireframe) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        } else {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        }
+
+    } else if (key(GLFW_KEY_J).down || key(GLFW_KEY_DOWN).down) {
+        if (state.player1.pos.y - PADDLE_SPEED >= 0) {
+            state.player1.pos.y -= PADDLE_SPEED;
+        } else {
+            state.player1.pos.y = 0;
+        }
+    } else if (key(GLFW_KEY_K).down || key(GLFW_KEY_UP).down) {
+        if (state.player1.pos.y + PADDLE_SPEED + PADDLE_HEIGHT <=
+            (f32)state.window.size.y) {
+            state.player1.pos.y += PADDLE_SPEED;
+        } else {
+            state.player1.pos.y = (f32)state.window.size.y - PADDLE_HEIGHT;
+        }
+    } else if (key(GLFW_KEY_ESCAPE).down) {
+        state.running = false;
+    }
+}
 int update(void) {
     update_kbd();
 
@@ -217,31 +244,7 @@ int update(void) {
         }
     }
 
-    if (key(GLFW_KEY_RIGHT_BRACKET).tapped) {
-        state.window.wireframe = !state.window.wireframe;
-
-        if (state.window.wireframe) {
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        } else {
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        }
-
-    } else if (key(GLFW_KEY_J).down || key(GLFW_KEY_DOWN).down) {
-        if (state.player1.pos.y - PADDLE_SPEED >= 0) {
-            state.player1.pos.y -= PADDLE_SPEED;
-        } else {
-            state.player1.pos.y = 0;
-        }
-    } else if (key(GLFW_KEY_K).down || key(GLFW_KEY_UP).down) {
-        if (state.player1.pos.y + PADDLE_SPEED + PADDLE_HEIGHT <=
-            (f32)state.window.size.y) {
-            state.player1.pos.y += PADDLE_SPEED;
-        } else {
-            state.player1.pos.y = (f32)state.window.size.y - PADDLE_HEIGHT;
-        }
-    } else if (key(GLFW_KEY_ESCAPE).down) {
-        state.running = false;
-    }
+    process_input();
 
     return OK;
 }
