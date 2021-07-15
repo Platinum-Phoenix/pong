@@ -199,18 +199,21 @@ int update(void) {
 
     f32 pad_cen = state.player2.pos.y + PADDLE_HEIGHT / 2;
     f32 ball_cen = state.ball.pos.y + BALL_HEIGHT / 2;
-    if (ball_cen - pad_cen > 3.0f) {
-        if (state.player2.pos.y + PADDLE_SPEED + PADDLE_HEIGHT <=
-            (f32)state.window.size.y) {
-            state.player2.pos.y += PADDLE_SPEED;
-        } else {
-            state.player2.pos.y = (f32)state.window.size.y - PADDLE_HEIGHT;
-        }
-    } else if (ball_cen - pad_cen < -3.0f) {
-        if (state.player2.pos.y - PADDLE_SPEED >= 0) {
-            state.player2.pos.y -= PADDLE_SPEED;
-        } else {
-            state.player2.pos.y = 0;
+
+    if (state.ball.pos.x > (f32)state.window.size.x / 2) {
+        if (ball_cen - pad_cen > PADDLE_HEIGHT / 2.0f) {
+            if (state.player2.pos.y + PADDLE_SPEED + PADDLE_HEIGHT <=
+                (f32)state.window.size.y) {
+                state.player2.pos.y += PADDLE_SPEED;
+            } else {
+                state.player2.pos.y = (f32)state.window.size.y - PADDLE_HEIGHT;
+            }
+        } else if (ball_cen - pad_cen < -PADDLE_HEIGHT / 2.0f) {
+            if (state.player2.pos.y - PADDLE_SPEED >= 0) {
+                state.player2.pos.y -= PADDLE_SPEED;
+            } else {
+                state.player2.pos.y = 0;
+            }
         }
     }
 
