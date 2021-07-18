@@ -5,6 +5,7 @@
 #include "gfx/shader.h"
 #include "gfx/text.h"
 #include "gfx/window.h"
+#include "audio/audio.h"
 
 enum GameState { STATE_MENU, STATE_ACTIVE, STATE_END };
 
@@ -19,6 +20,7 @@ enum ShaderType {
 
 struct State {
     struct TextRenderer text_renderer;
+    struct AudioEngine audio_engine;
     struct Window window;
     struct Camera camera;
     struct Paddle player1, player2;

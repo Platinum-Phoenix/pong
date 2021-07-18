@@ -10,11 +10,7 @@ int main(void) {
     state.window.init();
 
     loop {
-        // the game starts a bit too quick
-        if (glfwGetTime() >= 0.6f) {
-            // Process input and update posistions
-            state.window.update();
-        }
+        state.window.update();
 
         state.window.render();
 

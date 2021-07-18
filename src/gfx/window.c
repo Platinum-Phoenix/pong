@@ -48,7 +48,7 @@ int window_create(void) {
     state.window.update = update;
     state.window.render = render;
     state.window.last_second = glfwGetTime();
-    
+  
     glfwSetErrorCallback(err_fn);
 
     if (!glfwInit()) {
@@ -75,7 +75,7 @@ int window_create(void) {
         error("[GLFW] error: failed to create window");
         return ERR;
     }
-
+    
     glfwMakeContextCurrent(state.window.handle);
     // Load OpenGL extensions and functions
     gladLoadGL(glfwGetProcAddress);

@@ -1,4 +1,5 @@
 #include "game.h"
+#include "audio/audio.h"
 #include "cglm/util.h"
 #include "gfx/shader.h"
 #include "gfx/text.h"
@@ -93,6 +94,8 @@ int init(void) {
         return ERR;
     }
 
+    audio_engine_init(&state.audio_engine);
+
     // for font rendering
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -112,6 +115,7 @@ int init(void) {
 int destroy(void) {
     for (size_t i = 0; i < SHADER_LAST; ++i)
         shader_destroy(state.shaders[i]);
+
     paddle_destroy(&state.player1);
     paddle_destroy(&state.player2);
     ball_destroy(&state.ball);
@@ -150,10 +154,10 @@ static void process_input(void) {
 }
 int update(void) {
     update_kbd();
-
     if (state.game_state == STATE_MENU) {
         if (key(GLFW_KEY_ENTER).tapped) {
             state.game_state = STATE_ACTIVE;
+            audio_engine_play_sound(&state.audio_engine, SOUND_BEEP);
         }
         return OK;
     }
@@ -184,6 +188,7 @@ int update(void) {
         f32 norm_land_dist_y = (land_dist_y / (PADDLE_HEIGHT / 2));
         state.ball.dir = norm_land_dist_y * glm_rad(75);
         state.ball.speed *= 1.05f;
+        audio_engine_play_sound(&state.audio_engine, SOUND_BOUNCE);
     } else if (rects_collide(state.player2.pos, PADDLE_SIZE, state.ball.pos,
                              BALL_SIZE)) {
         f32 land_dist_y =
@@ -192,6 +197,7 @@ int update(void) {
         state.ball.dir = -GLM_PI - (norm_land_dist_y * glm_rad(75));
         state.ball.speed *= 1.05f;
         state.ball.pos.x = state.player2.pos.x - PADDLE_WIDTH * 2;
+        audio_engine_play_sound(&state.audio_engine, SOUND_BOUNCE);
     } else if (state.ball.pos.x <= 0) {
         // hit the left; player2 score increases
         state.player2.score += 1;
@@ -200,6 +206,7 @@ int update(void) {
         // reset the ball's speed
         state.ball.speed = BALL_SPEED_INIT;
         state.ball.pos.x = BALL_WIDTH;
+        audio_engine_play_sound(&state.audio_engine, SOUND_BEEP);
     } else if (state.ball.pos.x + BALL_WIDTH >= (f32)state.window.size.x) {
         // hit the right wall; player1 score increases
         state.player1.score += 1;
@@ -208,16 +215,19 @@ int update(void) {
         // reset the ball's speed
         state.ball.speed = BALL_SPEED_INIT;
         state.ball.pos.x = (f32)state.window.size.x - BALL_WIDTH;
+        audio_engine_play_sound(&state.audio_engine, SOUND_BEEP);
     } else if (state.ball.pos.y + BALL_HEIGHT >= (f32)state.window.size.y) {
         // top wall
         state.ball.dir = -state.ball.dir;
         state.ball.speed += 0.1f;
         state.ball.pos.y = (f32)state.window.size.y - BALL_HEIGHT;
+        audio_engine_play_sound(&state.audio_engine, SOUND_BOUNCE);
     } else if (state.ball.pos.y <= 0) {
         // bottom wall
         state.ball.dir = -state.ball.dir;
         state.ball.speed += 0.1f;
         state.ball.pos.y = 0;
+        audio_engine_play_sound(&state.audio_engine, SOUND_BOUNCE);
     }
 
     state.ball.pos.x += state.ball.speed * cos(state.ball.dir);
