@@ -19,7 +19,7 @@ void error(const char *fmt, ...) {
     va_end(args);
     fputs("\n", stderr);
     if (errno != 0) {
-        fprintf(stderr, "[os] error(code:%d): %s\n", errno, strerror(errno));
+        fprintf(stderr, "    >>> [os] error(code:%d): %s\n", errno, strerror(errno));
     }
 }
 
