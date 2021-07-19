@@ -26,7 +26,7 @@
     (vec2s) {                                                                  \
         { PADDLE_WIDTH, PADDLE_HEIGHT }                                        \
     }
-#define BALL_SPEED_INIT 8.0f
+#define BALL_SPEED_INIT 10.0f
 enum Side { SIDE_LEFT, SIDE_RIGHT };
 
 static void ball_init(struct Ball *self) {
