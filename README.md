@@ -1,5 +1,7 @@
 # pong
 
+[![Build](https://github.com/Platinum-Phoenix/pong/actions/workflows/build.yml/badge.svg)](https://github.com/Platinum-Phoenix/pong/actions/workflows/build.yml)
+
 ## About
 
 A simple pong implementation using OpenGL 3.3 and C
