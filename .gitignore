@@ -1,0 +1,6 @@
+/build
+
+# editors
+/.cache
+compile_commands.json
+
