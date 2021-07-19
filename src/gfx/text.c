@@ -28,6 +28,7 @@ int text_renderer_init(struct TextRenderer *self) {
 
     for (unsigned char c = 0; c < CHAR_MAX; c++) {
         unsigned int texture;
+        ivec2s size, bearing;
         if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
             error("[freetype] error: failed to character glyph `%c`", c);
             // skip this glyph
@@ -45,13 +46,10 @@ int text_renderer_init(struct TextRenderer *self) {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        self->chars[c] = (struct Char){
-            .texture = texture,
-            .size =
-                (ivec2s){{face->glyph->bitmap.width, face->glyph->bitmap.rows}},
-            .bearing =
-                (ivec2s){{face->glyph->bitmap_left, face->glyph->bitmap_top}},
-            .advance = face->glyph->advance.x};
+        size = (ivec2s){{face->glyph->bitmap.width, face->glyph->bitmap.rows}};
+        bearing = (ivec2s){{face->glyph->bitmap_left, face->glyph->bitmap_top}};
+        self->chars[c] =
+            (struct Char){texture, size, bearing, face->glyph->advance.x};
     }
 
     self->vao = vao_create();
@@ -75,7 +73,8 @@ void render_text(struct TextRenderer *renderer, const char *text, vec2s pos,
     shader_use(state.shaders[SHADER_TEXT]);
     shader_uniform_vec3(state.shaders[SHADER_TEXT], "color", color);
     shader_uniform_mat4(state.shaders[SHADER_TEXT], "projection",
-                        state.camera.proj); vao_bind(renderer->vao);
+                        state.camera.proj);
+    vao_bind(renderer->vao);
 
     while ((c = *text++) != '\0') {
         struct Char ch = renderer->chars[c];
@@ -84,13 +83,16 @@ void render_text(struct TextRenderer *renderer, const char *text, vec2s pos,
         f32 w = ch.size.x * scale;
         f32 h = ch.size.y * scale;
 
+        // clang-format off
         float vertices[6][4] = {
-            {xpos, ypos + h, 0.0f, 0.0f},     {xpos, ypos, 0.0f, 1.0f},
-            {xpos + w, ypos, 1.0f, 1.0f},
-
-            {xpos, ypos + h, 0.0f, 0.0f},     {xpos + w, ypos, 1.0f, 1.0f},
+            {xpos,     ypos + h, 0.0f, 0.0f}, 
+            {xpos,     ypos,     0.0f, 1.0f},
+            {xpos + w, ypos,     1.0f, 1.0f},
+            {xpos,     ypos + h, 0.0f, 0.0f}, 
+            {xpos + w, ypos,     1.0f, 1.0f},
             {xpos + w, ypos + h, 1.0f, 0.0f},
         };
+        // clang-format on
 
         glBindTexture(GL_TEXTURE_2D, ch.texture);
         bo_bind(&renderer->vbo);
