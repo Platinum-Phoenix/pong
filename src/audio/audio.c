@@ -71,8 +71,8 @@ int audio_engine_init(struct AudioEngine *self) {
     alutInit(NULL, NULL);
 
     alListenerf(AL_GAIN, 1.0f);
-    alListener3f(AL_POSITION, 0.0f, 0.0f, 0.0f);
-    alListener3f(AL_VELOCITY, 0.0f, 0.0f, 0.0f);
+    alListenerfv(AL_POSITION, GLM_VEC3_ZERO);
+    alListenerfv(AL_VELOCITY, GLM_VEC3_ZERO);
     // clang-format off
     alListenerfv(AL_ORIENTATION, (f32[]) {
         0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f
