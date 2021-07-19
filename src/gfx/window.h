@@ -5,11 +5,10 @@
 #include "util/util.h"
 
 #define key(k) (state.window.kbd[k])
-#define loop while (!glfwWindowShouldClose(state.window.handle) && state.running) 
 
 struct Key {
     // Whether the key is held down
-    bool down; 
+    bool down;
     // The value of `down` from the last frame
     bool last;
     // Whether the key has been pressed **once**
@@ -19,10 +18,10 @@ struct Key {
 typedef int (*WinFn)(void);
 
 struct Window {
-    GLFWwindow* handle;
+    GLFWwindow *handle;
     // Keyboard
     struct Key kbd[GLFW_KEY_LAST];
-    ivec2s size; 
+    ivec2s size;
     WinFn init, destroy, update, render;
 
     u64 frames, fps;

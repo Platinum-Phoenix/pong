@@ -9,7 +9,7 @@ int main(void) {
 
     state.window.init();
 
-    loop {
+    while (!glfwWindowShouldClose(state.window.handle) && state.running) {
         state.window.update();
 
         state.window.render();
