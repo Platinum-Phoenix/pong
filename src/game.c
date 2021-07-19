@@ -113,7 +113,7 @@ int init(void) {
 }
 
 int destroy(void) {
-    for (size_t i = 0; i < SHADER_LAST; ++i)
+    for (size_t i = 0; i < SHADER_LAST; i++)
         shader_destroy(state.shaders[i]);
 
     paddle_destroy(&state.player1);
@@ -134,7 +134,6 @@ static void process_input(void) {
         } else {
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
-
     } else if (key(GLFW_KEY_J).down || key(GLFW_KEY_DOWN).down) {
         if (state.player1.pos.y - PADDLE_SPEED >= 0) {
             state.player1.pos.y -= PADDLE_SPEED;
@@ -150,8 +149,11 @@ static void process_input(void) {
         }
     } else if (key(GLFW_KEY_ESCAPE).down) {
         state.running = false;
+    } else if (key(GLFW_KEY_P).tapped) {
+        state.game_state = STATE_PAUSE;
     }
 }
+
 int update(void) {
     update_kbd();
     if (state.game_state == STATE_MENU) {
@@ -166,6 +168,13 @@ int update(void) {
         if (key(GLFW_KEY_ENTER).tapped) {
             state.game_state = STATE_ACTIVE;
             state.running = false;
+        }
+        return OK;
+    }
+
+    if (state.game_state == STATE_PAUSE) {
+        if (key(GLFW_KEY_P).tapped || key(GLFW_KEY_ESCAPE).tapped) {
+            state.game_state = STATE_ACTIVE;
         }
         return OK;
     }
@@ -284,6 +293,7 @@ static void render_menu(void) {
 
 void render_winner(void) {
     char text[36];
+
     snprintf(text, sizeof(text), "CONGRATULATIONS, PLAYER %d. YOU WIN!",
              state.winner);
 
@@ -301,6 +311,12 @@ int render(void) {
         break;
     case STATE_ACTIVE:
         render_game();
+        break;
+    case STATE_PAUSE:
+        render_text(&state.text_renderer, "PAUSED", (vec2s){{275.0f, 350.0f}},
+                    1.0f, GLMS_VEC3_ONE);
+        render_text(&state.text_renderer, "PRESS <P> or <ESC> TO UNPAUSE",
+                    (vec2s){{130.0f, 200.0f}}, 0.5f, GLMS_VEC3_ONE);
         break;
     case STATE_END:
         render_winner();

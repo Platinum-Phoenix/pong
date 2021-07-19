@@ -1,15 +1,15 @@
 #ifndef STATE_H
 #define STATE_H
 
+#include "audio/audio.h"
 #include "game.h"
 #include "gfx/shader.h"
 #include "gfx/text.h"
 #include "gfx/window.h"
-#include "audio/audio.h"
 
-enum GameState { STATE_MENU, STATE_ACTIVE, STATE_END };
+enum GameState { STATE_MENU, STATE_ACTIVE, STATE_PAUSE, STATE_END };
 
-enum Winner { PLAYER_NONE = 0, PLAYER_1 = 1, PLAYER_2 = 2 };
+enum Winner { PLAYER_NONE, PLAYER_1, PLAYER_2 };
 
 enum ShaderType {
     SHADER_2D,
