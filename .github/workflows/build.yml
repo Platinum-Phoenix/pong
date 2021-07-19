@@ -20,8 +20,8 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          # opengl
-
+          # x11
+          sudo apt install libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxext-dev
           # openal
           sudo apt-get install libopenal1 libopenal-dev
           sudo apt-get install libalut0 libalut-dev
