@@ -3,14 +3,14 @@ cmake_minimum_required(VERSION 3.8.2)
 project(pong C)
 
 set(SOURCES
-	src/main.c
-  src/audio/audio.c
-  src/game.c
-  src/gfx/gfx.c
-  src/gfx/shader.c
-  src/gfx/text.c
-  src/gfx/window.c
-  src/util/util.c
+    src/audio/audio.c
+    src/game.c
+    src/gfx/gfx.c
+    src/gfx/shader.c
+    src/gfx/text.c
+    src/gfx/window.c
+    src/main.c
+    src/util/util.c
 )
 
 find_package(OpenAL REQUIRED)
