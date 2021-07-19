@@ -23,7 +23,7 @@ char *alGetErrorString(ALenum err) {
     }
 }
 
-int add_sound(struct AudioEngine *self, enum Sound sound, ALbyte *path) {
+int add_sound(struct AudioEngine *self, enum Sound sound, char *path) {
     int result = OK;
     ALenum err;
     ALsizei size, freq;
@@ -33,7 +33,7 @@ int add_sound(struct AudioEngine *self, enum Sound sound, ALbyte *path) {
     alutLoadWAVFile(path, &format, &data, &size, &freq);
 #else
     Albool loop;
-    alutLoadWAVFile(path, &format, &data, &size, &freq, &loop);
+    alutLoadWAVFile((ALbyte *)path, &format, &data, &size, &freq, &loop);
 #endif
 
     alBufferData(self->audio_buffers[sound], format, data, size, freq);
