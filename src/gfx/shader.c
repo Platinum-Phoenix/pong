@@ -20,7 +20,8 @@ static const char *shader_str(GLenum s) {
 static int compile_shader(const char *path, GLenum type) {
     FILE *fp;
     char *txt = NULL;
-    size_t sz;
+    long result;
+    size_t size;
     unsigned int handle;
     int sucessful, ret = -1;
 
@@ -35,29 +36,34 @@ static int compile_shader(const char *path, GLenum type) {
         error("[io] error: fseek() failed");
         goto cleanup_file;
     }
-    if ((sz = ftell(fp)) < 0) {
+
+    if ((result = ftell(fp)) < 0) {
         error("[io] error: ftell() failed");
         goto cleanup_file;
+    } else {
+        size = result;
     }
+
     if (fseek(fp, 0, SEEK_SET) < 0) {
         error("[io] error: fseek() failed");
         goto cleanup_file;
     }
 
-    if ((txt = malloc(sz)) == NULL) {
+    if ((txt = malloc(size)) == NULL) {
         error("[alloc] error: insufficent memory to load the shader");
         goto cleanup_file;
     }
 
-    fread(txt, 1, sz, fp);
-
-    if (ferror(fp)) {
-        error("[io] error: fread() failed");
-        goto cleanup_txt;
+    if (fread(txt, 1, size, fp) < size) {
+        if (ferror(fp)) {
+            error("[io] error: fread() failed");
+            goto cleanup_txt;
+        }
     }
 
     handle = glCreateShader(type);
-    glShaderSource(handle, 1, (const GLchar *const *)&txt, (const GLint *)&sz);
+    glShaderSource(handle, 1, (const GLchar *const *)&txt,
+                   (const GLint *)&size);
 
     glCompileShader(handle);
     glGetShaderiv(handle, GL_COMPILE_STATUS, &sucessful);
@@ -90,10 +96,16 @@ cleanup:
 
 int shader_init(struct Shader *self, const char *vs_path, const char *fs_path) {
     int sucessful;
-    unsigned int vs_handle = compile_shader(vs_path, GL_VERTEX_SHADER);
-    if (vs_handle < 0)
-        return -1;
-    unsigned int fs_handle = compile_shader(fs_path, GL_FRAGMENT_SHADER);
+    int vs_handle = compile_shader(vs_path, GL_VERTEX_SHADER);
+    int fs_handle = compile_shader(fs_path, GL_FRAGMENT_SHADER);
+    if (vs_handle < 0) {
+        error("[shader] error: failed to compile the vertex shader");
+        return ERR;
+    }
+    if (fs_handle < 0) {
+        error("[shader] error: failed to compile the fragment shader");
+        return ERR;
+    }
     self->handle = glCreateProgram();
     glAttachShader(self->handle, vs_handle);
     glAttachShader(self->handle, fs_handle);
@@ -113,7 +125,7 @@ int shader_init(struct Shader *self, const char *vs_path, const char *fs_path) {
         free(log);
     }
 
-    return 0;
+    return OK;
 }
 
 GLint shader_uniform_loc(struct Shader self, const char *name) {
