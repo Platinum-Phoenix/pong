@@ -5,6 +5,7 @@
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
 #define alClearErrorState alGetError
+
 char *alGetErrorString(ALenum err) {
     switch (err) {
     case AL_NO_ERROR:
@@ -75,7 +76,8 @@ int audio_engine_init(struct AudioEngine *self) {
     alListenerfv(AL_VELOCITY, GLM_VEC3_ZERO);
     // clang-format off
     alListenerfv(AL_ORIENTATION, (f32[]) {
-        0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f
+        0.0f, 0.0f, 1.0f, 
+        0.0f, 1.0f, 0.0f
     });
     // clang-format on
 
@@ -106,7 +108,6 @@ int audio_engine_init(struct AudioEngine *self) {
         return ERR;
     }
 
-
     if (add_sound(self, SOUND_LOSE, "res/audio/lose.wav") != OK) {
         error("[audio_engine] error: failed to add the lose sound effect");
         return ERR;
@@ -118,7 +119,6 @@ int audio_engine_init(struct AudioEngine *self) {
         error("[openal::alSourcef] error: %s", alGetErrorString(err));
         return ERR;
     }
-
 
     return OK;
 }
@@ -137,4 +137,3 @@ int audio_engine_play_sound(struct AudioEngine *self, enum Sound sound) {
 
     return OK;
 }
-
