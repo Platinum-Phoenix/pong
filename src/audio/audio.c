@@ -34,6 +34,7 @@ int add_sound(struct AudioEngine *self, enum Sound sound, ALbyte *path) {
     Albool loop;
     alutLoadWAVFile(path, &format, &data, &size, &freq, &loop);
 #endif
+
     alBufferData(self->audio_buffers[sound], format, data, size, freq);
 
     if ((err = alGetError()) != AL_NO_ERROR) {
@@ -89,14 +90,35 @@ int audio_engine_init(struct AudioEngine *self) {
     }
 
     if (add_sound(self, SOUND_BEEP, "res/audio/beep.wav") != OK) {
-        error("[audio_engine] error: failed to add the select sound");
+        error("[audio_engine] error: failed to add the beep sound effect");
         return ERR;
     }
 
     if (add_sound(self, SOUND_BOUNCE, "res/audio/bounce.wav") != OK) {
-        error("[audio_engine] error: failed to add the select sound");
+        error("[audio_engine] error: failed to add the bounce sound effect");
         return ERR;
     }
+
+    alSourcef(self->audio_sources[SOUND_BOUNCE], AL_GAIN, 0.5f);
+
+    if (add_sound(self, SOUND_WIN, "res/audio/win.wav") != OK) {
+        error("[audio_engine] error: failed to add the win sound effect");
+        return ERR;
+    }
+
+
+    if (add_sound(self, SOUND_LOSE, "res/audio/lose.wav") != OK) {
+        error("[audio_engine] error: failed to add the lose sound effect");
+        return ERR;
+    }
+
+    alSourcef(self->audio_sources[SOUND_LOSE], AL_GAIN, 100.0f);
+
+    if ((err = alGetError()) != AL_NO_ERROR) {
+        error("[openal::alSourcef] error: %s", alGetErrorString(err));
+        return ERR;
+    }
+
 
     return OK;
 }

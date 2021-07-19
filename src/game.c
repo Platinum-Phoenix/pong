@@ -173,9 +173,11 @@ int update(void) {
     if (state.player1.score >= 11) {
         state.game_state = STATE_END;
         state.winner = PLAYER_1;
+        audio_engine_play_sound(&state.audio_engine, SOUND_WIN);
     } else if (state.player2.score >= 11) {
         state.game_state = STATE_END;
         state.winner = PLAYER_2;
+        audio_engine_play_sound(&state.audio_engine, SOUND_LOSE);
     }
 
     // when the ball collides with the paddle, I use where it lands to

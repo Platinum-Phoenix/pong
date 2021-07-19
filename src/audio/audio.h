@@ -3,12 +3,15 @@
 
 #include "al.h"
 #include "alut.h"
+
 enum Sound {
     SOUND_BEEP,
     SOUND_BOUNCE,
+    SOUND_WIN,
+    SOUND_LOSE
 };
 
-#define LAST_SOUND SOUND_BOUNCE
+#define LAST_SOUND SOUND_LOSE
 #define NUM_SOUNDS LAST_SOUND + 1
 
 struct AudioEngine {
