@@ -21,6 +21,11 @@ set_property(TARGET pong PROPERTY C_STANDARD 11)
 set_property(TARGET pong PROPERTY C_STANDARD_REQUIRED on)
 
 target_link_libraries(pong PRIVATE cglm glfw glad freetype ${OPENAL_LIBRARY})
+
+if (UNIX AND NOT APPLE)
+  target_link_libraries(pong PRIVATE alut)
+endif()
+
 include_directories(src)
 target_include_directories(pong PRIVATE ${OPENAL_INCLUDE_DIR})
 add_subdirectory(lib)
