@@ -32,7 +32,7 @@ int add_sound(struct AudioEngine *self, enum Sound sound, char *path) {
 #ifdef __APPLE_CC__
     alutLoadWAVFile(path, &format, &data, &size, &freq);
 #else
-    Albool loop;
+    ALboolean loop;
     alutLoadWAVFile((ALbyte *)path, &format, &data, &size, &freq, &loop);
 #endif
 
