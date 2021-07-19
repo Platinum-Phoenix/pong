@@ -1,8 +1,15 @@
 #include "audio.h"
 #include "util/util.h"
 
+#ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
 
 #define alClearErrorState alGetError
 
@@ -29,7 +36,7 @@ int add_sound(struct AudioEngine *self, enum Sound sound, char *path) {
     ALsizei size, freq;
     ALenum format;
     ALvoid *data;
-#ifdef __APPLE_CC__
+#ifdef __APPLE__
     alutLoadWAVFile(path, &format, &data, &size, &freq);
 #else
     ALbool loop;
