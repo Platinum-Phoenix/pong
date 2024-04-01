@@ -19,7 +19,7 @@ typedef struct {
     ALuint audio_sources[NUM_SOUNDS];
 } AudioEngine;
 
-int audio_engine_init(AudioEngine *self);
-int audio_engine_play_sound(AudioEngine *self, Sound sound);
+int audio_engine_init(AudioEngine* self);
+int audio_engine_play_sound(AudioEngine* self, Sound sound);
 
 #endif

@@ -1,15 +1,6 @@
 #include "audio.h"
+#include "alut.h"
 #include "util/util.h"
-
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-#endif
-
-#ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#endif
 
 #define alClearErrorState alGetError
 
@@ -33,17 +24,20 @@ char* alGetErrorString(ALenum err) {
 int add_sound(AudioEngine* self, Sound sound, char* path) {
     int result = OK;
     ALenum err;
-    ALsizei size, freq;
+    ALsizei size;
+    ALfloat freq;
     ALenum format;
-    ALvoid* data;
-#ifdef OS_MAC
-    alutLoadWAVFile(path, &format, &data, &size, &freq);
-#else
-    ALboolean loop;
-    alutLoadWAVFile((ALbyte*)path, &format, &data, &size, &freq, &loop);
-#endif
 
-    alBufferData(self->audio_buffers[sound], format, data, size, freq);
+    ALvoid* sound_data = alutLoadMemoryFromFile(path, &format, &size, &freq);
+
+    if (!sound_data) {
+        error("[openal::alutCreateBufferFromFile] error: %s",
+              alutGetErrorString(alutGetError()));
+        result = ERR;
+        goto cleanup;
+    }
+
+    alBufferData(self->audio_buffers[sound], format, sound_data, size, freq);
 
     if ((err = alGetError()) != AL_NO_ERROR) {
         error("[openal::alBufferData] error: %s", alGetErrorString(err));
@@ -68,7 +62,7 @@ int add_sound(AudioEngine* self, Sound sound, char* path) {
     alSourcei(self->audio_sources[sound], AL_LOOPING, AL_FALSE);
 
 cleanup:
-    alutUnloadWAV(format, data, size, freq);
+    free(sound_data);
     return result;
 }
 
