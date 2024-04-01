@@ -22,6 +22,7 @@ A simple pong implementation using OpenGL 3.3 and C
 2.  Initialize all the git submodules:
     ```sh
     git submodule init
+    git submodule update
     ```
 3.  Create and move into a build directory: e.g.
 
