@@ -13,34 +13,34 @@
 
 #define alClearErrorState alGetError
 
-char *alGetErrorString(ALenum err) {
+char* alGetErrorString(ALenum err) {
     switch (err) {
-    case AL_NO_ERROR:
-        return "no error";
-    case AL_INVALID_NAME:
-        return "invalid name/identifier";
-    case AL_INVALID_ENUM:
-        return "invalid enum value";
-    case AL_INVALID_OPERATION:
-        return "invalid operation";
-    case AL_OUT_OF_MEMORY:
-        return "out of memory";
-    default:
-        return "unknown error";
+        case AL_NO_ERROR:
+            return "no error";
+        case AL_INVALID_NAME:
+            return "invalid name/identifier";
+        case AL_INVALID_ENUM:
+            return "invalid enum value";
+        case AL_INVALID_OPERATION:
+            return "invalid operation";
+        case AL_OUT_OF_MEMORY:
+            return "out of memory";
+        default:
+            return "unknown error";
     }
 }
 
-int add_sound(struct AudioEngine *self, enum Sound sound, char *path) {
+int add_sound(AudioEngine* self, Sound sound, char* path) {
     int result = OK;
     ALenum err;
     ALsizei size, freq;
     ALenum format;
-    ALvoid *data;
-#ifdef __APPLE__
+    ALvoid* data;
+#ifdef OS_MAC
     alutLoadWAVFile(path, &format, &data, &size, &freq);
 #else
     ALboolean loop;
-    alutLoadWAVFile((ALbyte *)path, &format, &data, &size, &freq, &loop);
+    alutLoadWAVFile((ALbyte*)path, &format, &data, &size, &freq, &loop);
 #endif
 
     alBufferData(self->audio_buffers[sound], format, data, size, freq);
@@ -72,7 +72,7 @@ cleanup:
     return result;
 }
 
-int audio_engine_init(struct AudioEngine *self) {
+int audio_engine_init(AudioEngine* self) {
     ALenum err;
 
     // FIXME: This should called with argc and argv
@@ -130,7 +130,7 @@ int audio_engine_init(struct AudioEngine *self) {
     return OK;
 }
 
-int audio_engine_play_sound(struct AudioEngine *self, enum Sound sound) {
+int audio_engine_play_sound(AudioEngine* self, Sound sound) {
     ALenum err;
 
     alClearErrorState();

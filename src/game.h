@@ -3,18 +3,19 @@
 
 #include "gfx/gfx.h"
 
-struct Paddle {
+typedef struct {
     vec2s pos;
     u32 score;
-    struct Mesh mesh;
-};
+    Mesh mesh;
+} Paddle;
 
-struct Ball {
+typedef struct {
     vec2s pos;
     // direction in radians
-    f32 dir, speed;
-    struct Mesh mesh;
-};
+    f32 dir;
+    f32 speed;
+    Mesh mesh;
+} Ball;
 
 int init(void);
 int update(void);

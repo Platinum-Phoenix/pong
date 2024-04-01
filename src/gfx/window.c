@@ -1,16 +1,16 @@
 #include "window.h"
 #include "game.h"
 #include "state.h"
-#include <sys/cdefs.h>
+
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
 
-static void err_fn(int code, const char *desc) {
+static void err_fn(int code, const char* desc) {
     error("[GLFW] error(code:%d): %s", code, desc);
 }
 
 // updates the window size
-static void size_fn(GLFWwindow *handle, int width, int height) {
+static void size_fn(GLFWwindow* handle, int width, int height) {
     (void)handle;
 
     glViewport(0, 0, width, height);
@@ -18,7 +18,7 @@ static void size_fn(GLFWwindow *handle, int width, int height) {
 }
 
 // updates the keyboard state
-static void kbd_fn(GLFWwindow *handle, int key, int scancode, int action,
+static void kbd_fn(GLFWwindow* handle, int key, int scancode, int action,
                    int mod) {
     (void)handle;
     (void)scancode;
@@ -37,7 +37,7 @@ static void kbd_fn(GLFWwindow *handle, int key, int scancode, int action,
 
 void update_kbd(void) {
     for (size_t key = 0; key < GLFW_KEY_LAST; key++) {
-        struct Key *k = &state.window.kbd[key];
+        Key* k = &state.window.kbd[key];
         k->tapped = k->down && !k->last;
         k->last = k->down;
     }
@@ -64,7 +64,7 @@ int window_create(void) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-#ifdef __APPLE__
+#ifdef OS_MAC
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
 #endif
 

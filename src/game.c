@@ -1,35 +1,35 @@
-#include "game.h"
-#include "audio/audio.h"
-#include "cglm/util.h"
-#include "gfx/shader.h"
-#include "gfx/text.h"
-#include "gfx/window.h"
-#include "state.h"
-#include "util/util.h"
-#include <assert.h>
+
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
+#include "audio/audio.h"
+#include "cglm/util.h"
+#include "game.h"
+#include "gfx/shader.h"
+#include "gfx/text.h"
+#include "gfx/window.h"
+#include "state.h"
+#include "util/util.h"
+
 #define PADDLE_SPEED 8.0f
 #define PADDLE_WIDTH 16.0f
 #define PADDLE_HEIGHT 128.0f
+#define PADDLE_SIZE ((vec2s){{PADDLE_WIDTH, PADDLE_HEIGHT}})
+
+#define BALL_SPEED_INIT 10.0f
 #define BALL_WIDTH 16.0f
 #define BALL_HEIGHT 16.0f
-#define BALL_SIZE                                                              \
-    (vec2s) {                                                                  \
-        { BALL_WIDTH, BALL_HEIGHT }                                            \
-    }
-#define PADDLE_SIZE                                                            \
-    (vec2s) {                                                                  \
-        { PADDLE_WIDTH, PADDLE_HEIGHT }                                        \
-    }
-#define BALL_SPEED_INIT 10.0f
-enum Side { SIDE_LEFT, SIDE_RIGHT };
+#define BALL_SIZE ((vec2s){{BALL_WIDTH, BALL_HEIGHT}})
 
-static void ball_init(struct Ball *self) {
+typedef enum {
+    SIDE_LEFT,
+    SIDE_RIGHT,
+} Side;
+
+static void ball_init(Ball* self) {
     mesh_init(&self->mesh, SQUARE_VERTICES, SQUARE_VERTICES_LEN, SQUARE_INDICES,
               SQUARE_INDICES_LEN);
 
@@ -39,37 +39,39 @@ static void ball_init(struct Ball *self) {
     self->dir = 0.0f;
 }
 
-static void ball_render(const struct Ball *self) {
+static void ball_render(const Ball* self) {
     mat3s model = glms_translate2d_make(self->pos);
     model = glms_scale2d(model, BALL_SIZE);
     mesh_render(&self->mesh, model);
 }
 
-static void ball_destroy(const struct Ball *self) { mesh_destroy(&self->mesh); }
+static void ball_destroy(const Ball* self) {
+    mesh_destroy(&self->mesh);
+}
 
-static void paddle_init(struct Paddle *self, enum Side side) {
+static void paddle_init(Paddle* self, Side side) {
     mesh_init(&self->mesh, SQUARE_VERTICES, SQUARE_VERTICES_LEN, SQUARE_INDICES,
               SQUARE_INDICES_LEN);
 
     switch (side) {
-    case SIDE_LEFT:
-        self->pos.x = PADDLE_WIDTH;
-        self->pos.y = (state.window.size.y / 2.0f) - (PADDLE_HEIGHT / 2);
-        break;
-    case SIDE_RIGHT:
-        self->pos.x = state.window.size.x - (PADDLE_WIDTH * 2);
-        self->pos.y = (state.window.size.y / 2.0f) - (PADDLE_HEIGHT / 2);
-        break;
+        case SIDE_LEFT:
+            self->pos.x = PADDLE_WIDTH;
+            self->pos.y = (state.window.size.y / 2.0f) - (PADDLE_HEIGHT / 2);
+            break;
+        case SIDE_RIGHT:
+            self->pos.x = state.window.size.x - (PADDLE_WIDTH * 2);
+            self->pos.y = (state.window.size.y / 2.0f) - (PADDLE_HEIGHT / 2);
+            break;
     }
 }
 
-static void paddle_render(const struct Paddle *self) {
+static void paddle_render(const Paddle* self) {
     mat3s model = glms_translate2d_make(self->pos);
     model = glms_scale2d(model, PADDLE_SIZE);
     mesh_render(&self->mesh, model);
 }
 
-static void paddle_destroy(const struct Paddle *self) {
+static void paddle_destroy(const Paddle* self) {
     mesh_destroy(&self->mesh);
 }
 
@@ -77,10 +79,12 @@ int init(void) {
     state.game_state = STATE_MENU;
     state.running = true;
     state.winner = PLAYER_NONE;
+
     // set the random seed
     srand((unsigned long)time(NULL));
 
     puts("PONG v0 by Phoenix");
+
     state.player1.score = 0;
     state.player2.score = 0;
     if (shader_init(&state.shaders[SHADER_2D], "res/shaders/2d.vert",
@@ -306,21 +310,21 @@ int render(void) {
     glClear(GL_COLOR_BUFFER_BIT);
 
     switch (state.game_state) {
-    case STATE_MENU:
-        render_menu();
-        break;
-    case STATE_ACTIVE:
-        render_game();
-        break;
-    case STATE_PAUSE:
-        render_text(&state.text_renderer, "PAUSED", (vec2s){{275.0f, 350.0f}},
-                    1.0f, GLMS_VEC3_ONE);
-        render_text(&state.text_renderer, "PRESS <P> or <ESC> TO UNPAUSE",
-                    (vec2s){{130.0f, 200.0f}}, 0.5f, GLMS_VEC3_ONE);
-        break;
-    case STATE_END:
-        render_winner();
-        break;
+        case STATE_MENU:
+            render_menu();
+            break;
+        case STATE_ACTIVE:
+            render_game();
+            break;
+        case STATE_PAUSE:
+            render_text(&state.text_renderer, "PAUSED",
+                        (vec2s){{275.0f, 350.0f}}, 1.0f, GLMS_VEC3_ONE);
+            render_text(&state.text_renderer, "PRESS <P> or <ESC> TO UNPAUSE",
+                        (vec2s){{130.0f, 200.0f}}, 0.5f, GLMS_VEC3_ONE);
+            break;
+        case STATE_END:
+            render_winner();
+            break;
     }
 
     return OK;

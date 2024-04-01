@@ -4,22 +4,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static const char *shader_str(GLenum s) {
+static const char* shader_str(GLenum s) {
     switch (s) {
-    case GL_VERTEX_SHADER:
-        return "vertex";
-    case GL_FRAGMENT_SHADER:
-        return "fragment";
-    case GL_GEOMETRY_SHADER:
-        return "geometry";
-    default:
-        return NULL;
+        case GL_VERTEX_SHADER:
+            return "vertex";
+        case GL_FRAGMENT_SHADER:
+            return "fragment";
+        case GL_GEOMETRY_SHADER:
+            return "geometry";
+        default:
+            return NULL;
     }
 }
 /// @returns the handle to the shader or -1 on error
-static int compile_shader(const char *path, GLenum type) {
-    FILE *fp;
-    char *txt = NULL;
+static int compile_shader(const char* path, GLenum type) {
+    FILE* fp;
+    char* txt = NULL;
     long result;
     size_t size;
     unsigned int handle;
@@ -27,7 +27,7 @@ static int compile_shader(const char *path, GLenum type) {
 
     fp = fopen(path, "rb");
     if (!fp) {
-        error("[io] error: couldnt load shader at %s", path);
+        error("[io] error: couldn't load shader at %s", path);
         goto cleanup;
     }
 
@@ -62,14 +62,13 @@ static int compile_shader(const char *path, GLenum type) {
     }
 
     handle = glCreateShader(type);
-    glShaderSource(handle, 1, (const GLchar *const *)&txt,
-                   (const GLint *)&size);
+    glShaderSource(handle, 1, (const GLchar* const*)&txt, (const GLint*)&size);
 
     glCompileShader(handle);
     glGetShaderiv(handle, GL_COMPILE_STATUS, &sucessful);
 
     if (!sucessful) {
-        char *log;
+        char* log;
         int len;
         glGetShaderiv(handle, GL_INFO_LOG_LENGTH, &len);
         log = malloc(len);
@@ -94,7 +93,7 @@ cleanup:
     return ret;
 }
 
-int shader_init(struct Shader *self, const char *vs_path, const char *fs_path) {
+int shader_init(Shader* self, const char* vs_path, const char* fs_path) {
     int sucessful;
     int vs_handle = compile_shader(vs_path, GL_VERTEX_SHADER);
     int fs_handle = compile_shader(fs_path, GL_FRAGMENT_SHADER);
@@ -114,7 +113,7 @@ int shader_init(struct Shader *self, const char *vs_path, const char *fs_path) {
     glGetShaderiv(self->handle, GL_LINK_STATUS, &sucessful);
 
     if (!sucessful) {
-        char *log;
+        char* log;
         int len;
         glGetShaderiv(self->handle, GL_INFO_LOG_LENGTH, &len);
         log = malloc(len);
@@ -128,7 +127,7 @@ int shader_init(struct Shader *self, const char *vs_path, const char *fs_path) {
     return OK;
 }
 
-GLint shader_uniform_loc(struct Shader self, const char *name) {
+GLint shader_uniform_loc(Shader self, const char* name) {
     int loc = glGetUniformLocation(self.handle, name);
     if (loc < 0) {
         fprintf(stderr, "[shader] warning: %s is not a uniform in shader#%d",
@@ -137,20 +136,24 @@ GLint shader_uniform_loc(struct Shader self, const char *name) {
     return loc;
 }
 
-void shader_use(struct Shader self) { glUseProgram(self.handle); }
+void shader_use(Shader self) {
+    glUseProgram(self.handle);
+}
 
-void shader_uniform_mat3(struct Shader self, const char *name, mat3s m) {
+void shader_uniform_mat3(Shader self, const char* name, mat3s m) {
     glUniformMatrix3fv(shader_uniform_loc(self, name), 1, GL_FALSE,
-                       (const GLfloat *)&m.raw);
+                       (const GLfloat*)&m.raw);
 }
 
-void shader_uniform_mat4(struct Shader self, const char *name, mat4s m) {
+void shader_uniform_mat4(Shader self, const char* name, mat4s m) {
     glUniformMatrix4fv(shader_uniform_loc(self, name), 1, GL_FALSE,
-                       (const GLfloat *)&m.raw);
+                       (const GLfloat*)&m.raw);
 }
 
-void shader_uniform_vec3(struct Shader self, const char *name, vec3s v) {
+void shader_uniform_vec3(Shader self, const char* name, vec3s v) {
     glUniform3f(shader_uniform_loc(self, name), v.x, v.y, v.z);
 }
 
-void shader_destroy(struct Shader self) { glDeleteProgram(self.handle); }
+void shader_destroy(Shader self) {
+    glDeleteProgram(self.handle);
+}

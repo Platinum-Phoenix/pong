@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include FT_MODULE_H
 
-int text_renderer_init(struct TextRenderer *self) {
+int text_renderer_init(TextRenderer* self) {
     FT_Library ft;
     FT_Face face;
     int status = OK;
@@ -48,8 +48,7 @@ int text_renderer_init(struct TextRenderer *self) {
 
         size = (ivec2s){{face->glyph->bitmap.width, face->glyph->bitmap.rows}};
         bearing = (ivec2s){{face->glyph->bitmap_left, face->glyph->bitmap_top}};
-        self->chars[c] =
-            (struct Char){texture, size, bearing, face->glyph->advance.x};
+        self->chars[c] = (Char){texture, size, bearing, face->glyph->advance.x};
     }
 
     self->vao = vao_create();
@@ -67,8 +66,8 @@ cleanup:
     return status;
 }
 
-void render_text(struct TextRenderer *renderer, const char *text, vec2s pos,
-                 f32 scale, vec3s color) {
+void render_text(TextRenderer* renderer, const char* text, vec2s pos, f32 scale,
+                 vec3s color) {
     unsigned char c;
     shader_use(state.shaders[SHADER_TEXT]);
     shader_uniform_vec3(state.shaders[SHADER_TEXT], "color", color);
@@ -77,7 +76,7 @@ void render_text(struct TextRenderer *renderer, const char *text, vec2s pos,
     vao_bind(renderer->vao);
 
     while ((c = *text++) != '\0') {
-        struct Char ch = renderer->chars[c];
+        Char ch = renderer->chars[c];
         f32 xpos = pos.x + ch.bearing.x * scale;
         f32 ypos = pos.y - (ch.size.y - ch.bearing.y) * scale;
         f32 w = ch.size.x * scale;

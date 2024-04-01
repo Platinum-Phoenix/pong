@@ -6,28 +6,28 @@
 
 #define key(k) (state.window.kbd[k])
 
-struct Key {
+typedef struct {
     // Whether the key is held down
     bool down;
     // The value of `down` from the last frame
     bool last;
     // Whether the key has been pressed **once**
     bool tapped;
-};
+} Key;
 
 typedef int (*WinFn)(void);
 
-struct Window {
+typedef struct {
     GLFWwindow *handle;
     // Keyboard
-    struct Key kbd[GLFW_KEY_LAST];
+    Key kbd[GLFW_KEY_LAST];
     ivec2s size;
     WinFn init, destroy, update, render;
 
     u64 frames, fps;
     f64 last_second;
     bool wireframe;
-};
+} Window;
 
 int window_create(void);
 void update_kbd(void);

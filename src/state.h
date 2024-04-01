@@ -7,27 +7,37 @@
 #include "gfx/text.h"
 #include "gfx/window.h"
 
-enum GameState { STATE_MENU, STATE_ACTIVE, STATE_PAUSE, STATE_END };
+typedef enum {
+    STATE_MENU,
+    STATE_ACTIVE,
+    STATE_PAUSE,
+    STATE_END,
+} GameState;
 
-enum Winner { PLAYER_NONE, PLAYER_1, PLAYER_2 };
+typedef enum {
+    PLAYER_NONE,
+    PLAYER_1,
+    PLAYER_2,
+} Winner;
 
-enum ShaderType {
+typedef enum {
     SHADER_2D,
     SHADER_TEXT,
-};
+} ShaderType;
 
 #define SHADER_LAST SHADER_TEXT
+#define SHADER_COUNT SHADER_LAST + 1
 
 struct State {
-    struct TextRenderer text_renderer;
-    struct AudioEngine audio_engine;
-    struct Window window;
-    struct Camera camera;
-    struct Paddle player1, player2;
-    struct Ball ball;
-    struct Shader shaders[SHADER_LAST + 1];
-    enum GameState game_state;
-    enum Winner winner;
+    TextRenderer text_renderer;
+    AudioEngine audio_engine;
+    Window window;
+    Camera camera;
+    Paddle player1, player2;
+    Ball ball;
+    Shader shaders[SHADER_COUNT];
+    GameState game_state;
+    Winner winner;
     bool running;
 };
 
